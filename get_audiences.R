@@ -78,8 +78,8 @@ try({
   
   if (Sys.info()[["effective_user"]] %in% c("fabio", "favstats")) {
     ### CHANGE ME WHEN LOCAL!
-    tf <- "7"
-    sets$cntry <- "GB"
+    tf <- "90"
+    sets$cntry <- "DE"
     print(paste0("TF: ", tf))
     print(paste0("cntry: ", sets))
     
@@ -467,19 +467,54 @@ if((which(scrape_dat$page_id == internal$page_id) %% round(nrow(scrape_dat)/4, -
     if (new_ds == latest_ds) {
       print(glue::glue("New DS: {new_ds}: Old DS: {latest_ds}"))
       
-      scrape_dat <- all_dat %>%
-        # arrange(page_id) %>%
-        # slice(1:150) %>%
-        filter(!(page_id %in% latest_elex$page_id))  %>%
+      scrape_dat <- all_dat  %>%
+        filter(!(page_id %in% (latest_elex  %>% filter(is.na(no_data)) %>% pull(page_id))))  %>%
         filter(page_id %in% last7$page_id) %>% 
-        mutate(total_n = n())
+        mutate(total_n = n()) %>% 
+        arrange(desc(amount_spent))
       
       print(paste0("Number of remaining pages to check: ", nrow(scrape_dat)))
       
-      ### save seperately
-      enddat <-  scrape_dat %>%
-        split(1:nrow(.)) %>%
-        map_dfr(scraper)
+      how_many_times_did_it_check <- latest_elex %>% count(tstamp) %>% nrow()
+      
+      if(how_many_times_did_it_check >= 2){
+        
+        source("py_targeting.R")
+        
+        if(nrow(as.data.frame(installed.packages()) %>% filter(Package == "reticulate")) == 0){
+          try({
+            install.packages("reticulate")
+            reticulate::install_miniconda()
+            reticulate::install_python()                 
+          })
+   
+        }
+        
+        # Randomize between scraper2 and scraper
+        use_scraper2 <- sample(c(TRUE, FALSE), 1)
+        
+        if(use_scraper2){
+          print("chose scraper2")
+          enddat <- scrape_dat %>%
+            split(1:nrow(.)) %>%
+            map_dfr(scraper2)
+        } else {
+          print("chose scraper2")
+          enddat <- scrape_dat %>%
+            split(1:nrow(.)) %>%
+            map_dfr(scraper)
+        }
+        
+      } else {
+        
+        ### save separately using scraper
+        enddat <- scrape_dat %>%
+          split(1:nrow(.)) %>%
+          map_dfr(scraper)
+        
+      }
+      
+
       
       if (nrow(enddat) == 0) {
         
