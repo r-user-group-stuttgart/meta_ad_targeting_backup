@@ -485,7 +485,11 @@ if((which(scrape_dat$page_id == internal$page_id) %% round(nrow(scrape_dat)/4, -
           try({
             install.packages("reticulate")
             reticulate::install_miniconda()
-            reticulate::install_python()                 
+            reticulate::install_python()    
+            
+            reticulate::py_install(packages = "requests", pip = T)
+            reticulate::conda_install(packages = "requests", pip = T)
+            
           })
    
         }
@@ -499,7 +503,7 @@ if((which(scrape_dat$page_id == internal$page_id) %% round(nrow(scrape_dat)/4, -
             split(1:nrow(.)) %>%
             map_dfr(scraper2)
         } else {
-          print("chose scraper2")
+          print("chose scraper")
           enddat <- scrape_dat %>%
             split(1:nrow(.)) %>%
             map_dfr(scraper)
