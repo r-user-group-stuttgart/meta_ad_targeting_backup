@@ -494,18 +494,26 @@ if((which(scrape_dat$page_id == internal$page_id) %% round(nrow(scrape_dat)/4, -
       } else {
         
         print("new data to be uploaded")
-        
+        try({
+        enddat <- enddat %>%
+          filter(is.na(no_data))
         if(is.null(enddat$page_id)){
           enddat$page_id <- enddat$internal_id
         }
+
+
+        )}  
         
         election_dat  <- enddat %>%
           mutate_at(vars(contains("total_spend_formatted")), ~ parse_number(as.character(.x))) %>%
           # rename(page_id = internal_id) %>%
           left_join(all_dat) %>%
           bind_rows(latest_elex %>% filter(!(page_id %in% enddat$page_id))) %>%
-          distinct()
-        
+          distinct() %>%
+          drop_na(page_id, internal_id)
+
+
+            
         dir.create(paste0("historic/",  as.character(new_ds)), recursive = T)
         
         
@@ -593,7 +601,7 @@ if((which(scrape_dat$page_id == internal$page_id) %% round(nrow(scrape_dat)/4, -
   
   print(file.exists(paste0(the_date, ".parquet")))
   
-  if(!(identical(latest_elex, election_dat))){
+  if(!(identical(latest_elex %>% select(-contains("tstamp")), election_dat %>% select(-contains("tstamp"))))){
     
     print("################ UPLOAD FILE ################")
     
