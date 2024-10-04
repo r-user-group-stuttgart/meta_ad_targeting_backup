@@ -188,14 +188,15 @@ try({
         )
     })
     
-    if (!exists("latest_elex")) {
+    if (!exists("latest_elex") | nrow(latest_elex)==0) {
       latest_elex <- tibble()
     }
-    
+                    
     if (!("ds" %in% names(latest_elex))) {
       latest_elex <- latest_elex %>% mutate(ds = "")
     }
-    
+
+
     latest_ds <- thosearethere$ds[1]
     
   })
@@ -505,7 +506,10 @@ try({
 
 })  # This is the correct closing bracket for the try block
 
-        
+        if(nrow(enddat)==0){
+          print("data to be added is empty whazzup")
+          election_dat <- tibble()
+        } else {
         election_dat  <- enddat %>%
           mutate_at(vars(contains("total_spend_formatted")), ~ parse_number(as.character(.x))) %>%
           # rename(page_id = internal_id) %>%
@@ -513,6 +517,9 @@ try({
           bind_rows(latest_elex %>% filter(!(page_id %in% enddat$page_id))) %>%
           distinct() %>%
           drop_na(page_id, internal_id)
+
+        }
+        
 
 
             
@@ -604,6 +611,9 @@ try({
   print(file.exists(paste0(the_date, ".parquet")))
   
   if(!(identical(latest_elex %>% select(-contains("tstamp")), election_dat %>% select(-contains("tstamp"))))){
+
+  if(nrow(election_dat)!=0){
+    
     
     print("################ UPLOAD FILE ################")
     
@@ -622,7 +632,10 @@ try({
     })
     
     print(paste0("################ UPLOADED FILE ################: ", sets$cntry))
-    
+    } else {
+      print("File is empty, will not be uploaded")
+
+    }
     
   } else {
     print("File is identical, will not be uploaded")
