@@ -399,12 +399,15 @@ try({
   fin <<- tibble(no_data = T)
   
   scraper <- function(internal, time = tf) {
-    
+
+    try({
+      
     if((which(scrape_dat$page_id == internal$page_id) %% round(nrow(scrape_dat)/4, -1)) == 0){
       
       print(paste0(internal$page_name,": ", round(which(scrape_dat$page_id == internal$page_id)/nrow(scrape_dat)*100, 2)))
       
     }
+    )}
    
     
     # if(is.null(fin$error)){
