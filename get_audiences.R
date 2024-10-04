@@ -493,16 +493,18 @@ if((which(scrape_dat$page_id == internal$page_id) %% round(nrow(scrape_dat)/4, -
         
       } else {
         
-        print("new data to be uploaded")
-        try({
-        enddat <- enddat %>%
-          filter(is.na(no_data))
-        if(is.null(enddat$page_id)){
-          enddat$page_id <- enddat$internal_id
-        }
+print("new data to be uploaded")
+try({
+  
+  enddat <- enddat %>%
+    filter(is.na(no_data))
+  
+  if(is.null(enddat$page_id)){
+    enddat$page_id <- enddat$internal_id
+  }
 
+})  # This is the correct closing bracket for the try block
 
-        )}  
         
         election_dat  <- enddat %>%
           mutate_at(vars(contains("total_spend_formatted")), ~ parse_number(as.character(.x))) %>%
