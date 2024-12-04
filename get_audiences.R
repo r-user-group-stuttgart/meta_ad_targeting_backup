@@ -479,8 +479,6 @@ if((which(scrape_dat$page_id == internal$page_id) %% round(nrow(scrape_dat)/4, -
       
       if(how_many_times_did_it_check >= 2){
         
-        source("py_targeting.R")
-        
         if(nrow(as.data.frame(installed.packages()) %>% filter(Package == "reticulate")) == 0){
           try({
             install.packages("reticulate")
@@ -493,6 +491,8 @@ if((which(scrape_dat$page_id == internal$page_id) %% round(nrow(scrape_dat)/4, -
           })
    
         }
+        source("py_targeting.R")
+        
         
         # Randomize between scraper2 and scraper
         use_scraper2 <- sample(c(TRUE, FALSE), 1)
