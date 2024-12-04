@@ -9,7 +9,7 @@ on:
 jobs:
   update-meta-targeting:
     name: Update Meta Targeting
-    runs-on: windows-latest
+    runs-on: macos-latest
     strategy:
       matrix:
         iso-code: ["AT", "BE", "BG", "CY", "CZ", "DE", "DK", "EE", "ES", "FI", 
